@@ -5,7 +5,6 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.otaliastudios.cameraview.AspectRatio;
 import com.otaliastudios.cameraview.CameraUtils;

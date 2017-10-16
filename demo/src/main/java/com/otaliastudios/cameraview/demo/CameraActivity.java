@@ -16,7 +16,6 @@ import com.otaliastudios.cameraview.CameraListener;
 import com.otaliastudios.cameraview.CameraLogger;
 import com.otaliastudios.cameraview.CameraOptions;
 import com.otaliastudios.cameraview.CameraView;
-import com.otaliastudios.cameraview.SessionType;
 import com.otaliastudios.cameraview.Size;
 
 
@@ -26,7 +25,6 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
     private ViewGroup controlPanel;
 
     private boolean mCapturingPicture;
-    private boolean mCapturingVideo;
 
     // To show stuff in the callback
     private Size mCaptureNativeSize;
@@ -42,10 +40,16 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
 
         camera = (CameraView) findViewById(R.id.camera);
         camera.addCameraListener(new CameraListener() {
-            public void onCameraOpened(CameraOptions options) { onOpened(); }
-            public void onPictureTaken(byte[] jpeg) { onPicture(jpeg); }
+            public void onCameraOpened(CameraOptions options) {
+                onOpened();
+            }
+
+            public void onPictureTaken(byte[] jpeg) {
+                onPicture(jpeg);
+            }
         });
 
+        findViewById(R.id.edit).setOnClickListener(this);
         findViewById(R.id.capturePhoto).setOnClickListener(this);
 
         controlPanel = (ViewGroup) findViewById(R.id.controls);
@@ -82,11 +86,6 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
     private void onPicture(byte[] jpeg) {
         mCapturingPicture = false;
         long callbackTime = System.currentTimeMillis();
-        if (mCapturingVideo) {
-            message("Captured while taking video. Size="+mCaptureNativeSize, false);
-            return;
-        }
-
         // This can happen if picture was taken with a gesture.
         if (mCaptureTime == 0) mCaptureTime = callbackTime - 300;
         if (mCaptureNativeSize == null) mCaptureNativeSize = camera.getCaptureSize();
@@ -105,10 +104,12 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
-            case R.id.edit: edit(); break;
-            case R.id.capturePhoto: capturePhoto(); break;
-            case R.id.captureVideo: captureVideo(); break;
-            case R.id.toggleCamera: toggleCamera(); break;
+            case R.id.edit:
+                edit();
+                break;
+            case R.id.capturePhoto:
+                capturePhoto();
+                break;
         }
     }
 
@@ -134,30 +135,6 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
         mCaptureNativeSize = camera.getCaptureSize();
         message("Capturing picture...", false);
         camera.capturePicture();
-    }
-
-    private void captureVideo() {
-        if (camera.getSessionType() != SessionType.VIDEO) {
-            message("Can't record video while session type is 'picture'.", false);
-            return;
-        }
-        if (mCapturingPicture || mCapturingVideo) return;
-        mCapturingVideo = true;
-        message("Recording for 8 seconds...", true);
-        camera.startCapturingVideo(null, 8000);
-    }
-
-    private void toggleCamera() {
-        if (mCapturingPicture) return;
-        switch (camera.toggleFacing()) {
-            case BACK:
-                message("Switched to back camera!", false);
-                break;
-
-            case FRONT:
-                message("Switched to front camera!", false);
-                break;
-        }
     }
 
     @Override
