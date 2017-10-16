@@ -2,6 +2,7 @@ package com.otaliastudios.cameraview.demo;
 
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetBehavior;
@@ -18,6 +19,8 @@ import com.otaliastudios.cameraview.CameraOptions;
 import com.otaliastudios.cameraview.CameraView;
 import com.otaliastudios.cameraview.SessionType;
 import com.otaliastudios.cameraview.Size;
+
+import java.io.File;
 
 
 public class CameraActivity extends AppCompatActivity implements View.OnClickListener, ControlView.Callback {
@@ -44,9 +47,13 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
         camera.addCameraListener(new CameraListener() {
             public void onCameraOpened(CameraOptions options) { onOpened(); }
             public void onPictureTaken(byte[] jpeg) { onPicture(jpeg); }
+            public void onVideoTaken(File video) { onVideo(video); }
         });
 
+        findViewById(R.id.edit).setOnClickListener(this);
         findViewById(R.id.capturePhoto).setOnClickListener(this);
+        findViewById(R.id.captureVideo).setOnClickListener(this);
+        findViewById(R.id.toggleCamera).setOnClickListener(this);
 
         controlPanel = (ViewGroup) findViewById(R.id.controls);
         ViewGroup group = (ViewGroup) controlPanel.getChildAt(0);
@@ -100,6 +107,13 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
 
         mCaptureTime = 0;
         mCaptureNativeSize = null;
+    }
+
+    private void onVideo(File video) {
+        mCapturingVideo = false;
+        Intent intent = new Intent(CameraActivity.this, VideoPreviewActivity.class);
+        intent.putExtra("video", Uri.fromFile(video));
+        startActivity(intent);
     }
 
     @Override
